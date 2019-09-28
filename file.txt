@@ -1,0 +1,335 @@
+﻿/*
+ ============================================================================
+ Name        : File.c
+ Author      : Sampada Gaikwad
+ Description : 
+ ============================================================================
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct{
+    int day;
+    int month;
+    int year;
+}dod;
+
+typedef struct{
+    int sal;;
+    char name[50];
+    char id[8];
+    dod;
+    long int phone;
+    char address[100];
+}emp;
+
+void Create(){
+    int no,dno=0;
+    printf("Enter no of entries of you want to fill\n");
+    scanf("%d",&no);
+    FILE *fp;
+    char file[15];
+    emp d;
+    printf("Enter the name of the file to be created for the database\n");
+    scanf("\n");
+    do{
+        gets(file);
+        if(strcmp(file,"temp")==0)
+            printf("INVALID NAME\n");
+        else break;
+    }while(1);
+    if((fp = fopen(file,"w")) == NULL){
+        printf("INVALID FILENAME..ENTER AGAIN\n");
+        Create(no);
+    }
+    int i;
+    char str[6];
+    fwrite(&no,sizeof(int),1,fp);
+    fwrite(&dno,sizeof(int),1,fp);
+    for(i=0 ; i<no ; i++){
+        printf("\nEntry no: %d\n",i+1);
+        printf("Enter name of employe: ");
+        scanf("\n");
+        gets(d.name);
+        printf("Enter salary: ");
+        scanf("%d",&d.sal);
+        printf("Enter phone number: ");
+        scanf("%ld",&(d.phone));
+        printf("Enter address: ");
+        scanf("\n");
+        gets(d.address);
+        sprintf(str, "%d" , (1111+i));
+        strcpy(d.id,"00");
+        strcat(d.id , str);
+        fwrite(&d,sizeof(d),1,fp);
+    }
+    fclose(fp);
+}
+
+void Display(){
+    int no;
+    FILE *fp;
+    char file[15];
+    printf("\n ENTER THE NAME OF FILE TO DISPLAY:");
+    scanf("\n");
+    gets(file);
+    if((fp = fopen(file,"r")) == NULL){
+        printf("\n INVALID FILE NAME...ENTER IT AGAIN:\n");
+        Display(no);
+    }
+    else{
+        int i,dno;
+       emp d;
+        fread(&no,sizeof(int),1,fp);
+        fread(&dno,sizeof(int),1,fp);
+        printf("No of records are %d\n",no);
+        printf("Name \t\temp_Id\tsalary\tmobile no\tAddress\n");
+        for(i=0 ; i<no ; i++){
+            fread(&d,sizeof(d),1,fp);
+            printf("%-22s\t%-8s\t%-12d\t%-12ld\t%s\n",d.name,d.id,d.sal,d.phone,d.address);
+        }
+        fclose(fp);
+    }
+}
+
+void Add(){
+    int no,dno;
+    FILE *fp;
+    emp d;
+    char file[15];
+    printf("\n Enter the name of the file:\n");
+    scanf("\n");
+    gets(file);
+    if((fp = fopen(file,"r")) == NULL){
+        printf("INVALID FILE NAME\n");
+        Add();
+    }
+    else{
+        fp = fopen(file,"r");
+        FILE *tmp = fopen("temp","w");
+        fread(&no,sizeof(int),1,fp);
+        no++;
+        fwrite(&no,sizeof(int),1,tmp);
+        fread(&dno,sizeof(int),1,fp);
+        fwrite(&dno,sizeof(int),1,tmp);
+        int i;
+        for(i=0 ; i<no-1 ; i++){
+            fread(&d,sizeof(d),1,fp);
+            fwrite(&d,sizeof(d),1,tmp);
+        }
+        fclose(fp);
+        printf("\nEntry no: %d\n",no);
+        printf("Enter name of employe: ");
+        scanf("\n");
+        gets(d.name);
+        printf("Enter salary: ");
+        scanf("%d",&d.sal);
+        printf("Enter phone number: ");
+        scanf("%li",&(d.phone));
+        printf("Enter address: ");
+        scanf("\n");
+        gets(d.address);
+        char str[5];
+        sprintf(str, "%d" , (1111+no+dno));
+        strcpy(d.id,"00");
+        strcat(d.id , str);
+        fwrite(&d,sizeof(d),1,tmp);
+       
+        fclose(tmp);
+        rename("temp",file);
+    }
+}
+
+void Delete(char ID[], char file[] ,int index)
+{
+    
+    int no,dno;
+    FILE *fp;
+    emp d;
+    if((fp = fopen(file,"r")) == NULL){
+        printf("ERROR\n");
+        Delete(ID,file,index);
+    }
+    else{
+        char str[6];
+        FILE *tmp = fopen("temp","w");
+        fread(&no,sizeof(int),1,fp);
+        no--;
+        fwrite(&no,sizeof(int),1,tmp);
+        fread(&dno,sizeof(int),1,fp);
+        dno++;
+        fwrite(&dno,sizeof(int),1,tmp);
+        int i;
+        for(i=0 ; i<no+1 ; i++){
+            if(i==index){
+                fread(&d,sizeof(d),1,fp);
+                continue;
+            }
+            else{
+                fread(&d,sizeof(d),1,fp);
+                fwrite(&d,sizeof(d),1,tmp);
+            }
+        }
+        fclose(fp);
+        fclose(tmp);
+        rename("temp",file);
+    }
+}
+
+void Modify(char ID[], char file[] ,int index){
+    int no,dno;
+    FILE *fp;
+    emp d;
+    if((fp = fopen(file,"r")) == NULL){
+        printf("\n ERROR\n");
+        Modify(ID,file,index);
+    }
+    else{
+        char str[6];
+        FILE *tmp = fopen("temp","w");
+        fread(&no,sizeof(int),1,fp);
+        fwrite(&no,sizeof(int),1,tmp);
+        fread(&dno,sizeof(int),1,fp);
+        fwrite(&dno,sizeof(int),1,tmp);
+        int i;
+        for(i=0 ; i<no ; i++){
+            fread(&d,sizeof(d),1,fp);
+            if(i==index){
+                printf("\nEntry no: %d\n",i+1);
+                int ch;
+                do{
+                    printf("1.Modify Name\n2.Modify salary\n3.Modify Phone Number\n4.Address\n5.Exit ");
+                    scanf("%d",&ch);
+                    scanf("\n");
+                    switch(ch){
+                    case 1:
+                        printf("Enter name of employe: ");
+                        gets(d.name);
+                        break;
+                    case 2:
+                        printf("Enter salary: ");
+                        scanf("%d",&d.sal);
+                        break;
+                    case 3:
+                        printf("Enter phone number: ");
+                        scanf("%ld",&(d.phone));
+                        break;
+                    case 4:
+                        printf("Enter address: ");
+                        scanf("\n");
+                        gets(d.address);
+                        break;
+                    case 5:
+                        printf("Exit\n");
+                        break;
+                    default:
+                        printf("Enter proper choices\n");
+                    }
+                }while(ch!=5);
+                sprintf(str, "%d" , (1111+i));
+                strcpy(d.id,"00");
+                strcat(d.id , str);
+            }
+            fwrite(&d,sizeof(d),1,tmp);
+        }
+        fclose(fp);
+        fclose(tmp);
+        rename("temp",file);
+    }
+}
+
+void Search(char ID[], int ch ){
+    int no,dno;
+    FILE *fp;
+    emp d;
+    char file[15];
+    printf("Enter the name of the file to be searched:\n");
+    gets(file);
+    if((fp = fopen(file,"r")) == NULL){
+        printf("\n INVALID FILENAME\n");
+        Search(ID, ch);
+    }
+    else{
+        int i;
+        fread(&no,sizeof(int),1,fp);
+        fread(&dno,sizeof(int),1,fp);
+        for(i=0 ; i<no ; i++ ){
+            fread(&d,sizeof(d),1,fp);
+            if(strcmp( ID , d.id )==0){
+                printf("Record:\n");
+                printf("Name of employe\t\tId\tsalary\tPhone Number\tAddress\n");
+                printf("%-22s\t%-8s\t%-12d\t%-12ld\t%s\n",d.name,d.id,d.sal,d.phone,d.address);
+                if(ch==0){
+                    fclose(fp);
+                    break;
+                }
+                else{
+                    switch (ch) {                            //it takes users choice
+                    case 1:                                    //Modify Record
+                        fclose(fp);
+                        Modify(ID,file,i);
+                        break;
+                    case 2:                                    //Delete Record
+                        fclose(fp);
+                        Delete(ID,file,i);
+                        printf("The above record is deleted\n");
+                        break;
+                    default:
+                        printf("INVALID CHOICE\n");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main(void) {
+    char id[8];                                        //Array to search ID
+    int ch,choice;                                            //Integer for menu choice
+    do{
+        printf("MENU...");
+        printf("\n1.Create Database\n2.Display Database\n3.Add Record\n4.Search a Record\n5.Modify a Record\n6.Delete a Record\n7.Exit\n");
+        scanf("%d",&choice);
+        switch (choice) {
+        case 1:
+            Create();                                //Case to Create Records
+            break;
+        case 2:                                        //Case to Display Records
+            Display();
+            break;
+        case 3:                                        //Case to Add new Record
+            printf("\nADD RECORD\n");
+            Add();
+            break;
+        case 4:                                        //Case to Search Record
+            printf("Enter the ID to search:\n");
+            scanf("\n");
+            gets(id);
+            Search(id,0);
+            break;
+        case 5:                                        //Case to Modify Record
+            printf("Enter the ID to modified.\n");
+            scanf("\n");
+            gets(id);
+            Search(id,1);
+            break;
+        case 6:                                        //Case to Delete Record
+            printf("Enter the ID to be deleted.\n");
+            scanf("\n");
+            gets(id);
+            Search(id,2);
+            break;
+        case 7:                                        //Case to Exit
+            printf("THANK YOU..!!\n");
+            break;
+        default:
+            printf("INVALID CHOICE\n");
+            
+        }
+         printf("\n ENTER 1 TO CONTINUE.::");
+         scanf("%d",&ch);
+    }while(ch==1);
+    return EXIT_SUCCESS;
+}
